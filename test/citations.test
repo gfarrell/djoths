@@ -1,0 +1,52 @@
+## Integral citations
+
+### Without positions
+
+````
+Hello [+@foo] and [+@bar]
+.
+<p>Hello <a class="citation" href="#cite1" role="doc-citation">Foo (1943)</a> and <a class="citation" href="#cite2" role="doc-citation">Bar (1989)</a>
+````
+
+### With positions
+
+````
+Hello [+@foo, p. 42]
+.
+<p>Hello <a class="citation" href="#cite1" role="doc-citation">Foo (1943, p. 42)</a>
+````
+
+### With multiple references
+
+````
+Hello [+@foo, p. 42; @bar; @baz, fig. 5]
+.
+<p>Hello <a class="citation" href="#cite1" role="doc-citation">Foo (1943, p. 42), Bar (1989), Baz (2123, fig. 5)</a>
+````
+
+## Non-integral citations
+
+### Without positions
+
+````
+Hello [@foo] and [@bar]
+.
+<p>Hello <a class="citation" href="#cite1" role="doc-citation">(Foo 1943)</a> and <a class="citation" href="#cite2" role="doc-citation">(Bar 1989)</a>
+````
+
+### With positions
+
+````
+Hello [@foo, p. 42]
+.
+<p>Hello <a class="citation" href="#cite1" role="doc-citation">(Foo 1943, p. 42)</a>
+````
+
+### With multiple references
+
+````
+Hello [+@foo, p. 42; @bar; @baz, fig. 5]
+.
+<p>Hello <a class="citation" href="#cite1" role="doc-citation">(Foo 1943, p. 42), (Bar 1989), (Baz 2123, fig. 5)</a>
+````
+
