@@ -24,6 +24,7 @@ import Data.ByteString (ByteString)
 import Data.Foldable as F
 import Control.Applicative
 import Data.Maybe (fromMaybe)
+import Data.Functor (($>))
 
 -- import Debug.Trace
 
@@ -138,8 +139,7 @@ pInline' = do
       fails pCloser
       (case c of
           '\\' -> pEscaped
-          '[' -> pFootnoteReference
-             <|> pLinkOrSpan
+          '[' -> pFootnoteReference <|> pCitation <|> pLinkOrSpan
           '<' -> pAutolink
           '!' -> pImage
           '_' -> pEmph
@@ -342,6 +342,24 @@ pFootnoteReference = do
              skipSatisfyByte (\c -> c /= ']' && not (isWs c))
   asciiChar ']'
   pure $ footnoteReference label
+
+pCitation :: P Inlines
+pCitation = do
+  asciiChar '['
+  citeMode <- (asciiChar '+' $> Integral) <|> pure NonIntegral
+  sources <- sepBy1 pCiteSource (asciiChar ';' *> optional_ ws)
+  pure $ citation citeMode sources
+  where
+    pCiteSource :: P CiteSource
+    pCiteSource = do
+      asciiChar '@'
+      label <- CiteSourceLabel <$> byteStringOf (
+                 skipMany $
+                   skipSatisfyByte (\c -> c /= ']' && c /= ',' && c /= ';' && not (isWs c))
+               )
+      maybePos <- fmap CiteSourcePosition <$>
+                    optional (byteStringOf (skipMany $ skipSatisfyByte (\c -> c /= ';' && c /= ']')))
+      pure $ CiteSource label maybePos
 
 -- returns Left with parsed content if no ] has been reached, otherwise Right
 -- with inner contents.

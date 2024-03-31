@@ -11,6 +11,7 @@ module Djot.Parse
   , anyChar
   , skipMany
   , skipSome
+  , sepBy1
   , eof
   , getState
   , updateState
@@ -44,7 +45,7 @@ import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as B8
 import Data.ByteString (ByteString)
 import Control.Applicative
-import Control.Monad (void, MonadPlus(..))
+import Control.Monad (void, MonadPlus(..), liftM2)
 import Data.Char (chr)
 import Data.Bits
 import Data.Maybe (fromMaybe)
@@ -247,6 +248,10 @@ skipMany parser = Parser go
 -- | Apply parser 1 or more times, discarding result.
 skipSome :: Parser s a -> Parser s ()
 skipSome parser = parser *> skipMany parser
+
+-- | Parse one or more occurrence of @p@, separated by @sep@.
+sepBy1 :: Parser s a -> Parser s sep -> Parser s [a]
+sepBy1 p sep = liftM2 (:) p (many (sep >> p))
 
 -- | Succeeds if no more input.
 eof :: Parser s ()

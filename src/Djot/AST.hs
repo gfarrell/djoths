@@ -38,12 +38,17 @@ module Djot.AST
   OrderedListDelim(..),
   OrderedListStyle(..),
   QuoteType(..),
+  CiteMode (..),
+  CiteSource (..),
+  CiteSourceLabel (..),
+  CiteSourcePosition (..),
   delete,
   displayMath,
   insert,
   emailLink,
   emph,
   footnoteReference,
+  citation,
   hardBreak,
   highlight,
   image,
@@ -151,6 +156,18 @@ data Target =
 data QuoteType = SingleQuotes | DoubleQuotes
   deriving (Show, Ord, Eq, Typeable, Data, Generic, Lift)
 
+data CiteMode = Integral | NonIntegral
+  deriving (Show, Ord, Eq, Typeable, Data, Generic, Lift)
+
+newtype CiteSourceLabel = CiteSourceLabel ByteString
+  deriving (Show, Ord, Eq, Typeable, Data, Generic, Lift)
+
+newtype CiteSourcePosition = CiteSourcePosition ByteString
+  deriving (Show, Ord, Eq, Typeable, Data, Generic, Lift)
+
+data CiteSource = CiteSource CiteSourceLabel (Maybe CiteSourcePosition)
+  deriving (Show, Ord, Eq, Typeable, Data, Generic, Lift)
+
 data Inline =
       Str ByteString
     | Emph Inlines
@@ -167,6 +184,7 @@ data Inline =
     | Image Inlines Target
     | Span Inlines
     | FootnoteReference ByteString
+    | Citation CiteMode [CiteSource]
     | UrlLink ByteString
     | EmailLink ByteString
     | RawInline Format ByteString
@@ -364,6 +382,9 @@ doubleQuoted = inline . Quoted DoubleQuotes
 footnoteReference :: ByteString -> Inlines
 footnoteReference = inline . FootnoteReference
 
+citation :: CiteMode -> [CiteSource] -> Inlines
+citation m = inline . Citation m
+
 urlLink, emailLink :: ByteString -> Inlines
 urlLink = inline . UrlLink
 emailLink = inline . EmailLink
@@ -444,6 +465,13 @@ inlinesToByteString = foldMap go . unMany
         EmailLink email -> email
         RawInline _ _ -> mempty
         FootnoteReference bs -> "[" <> bs <> "]"
+        Citation m xs -> "["
+            <> (if m == Integral then "+" else "")
+            <> B8.intercalate "; " (
+                map (\(CiteSource (CiteSourceLabel l) mPos) ->
+                  "@" <> l <> maybe "" (\(CiteSourcePosition p) -> ", " <> p) mPos)
+                xs)
+            <> "]"
         SoftBreak -> "\n"
         HardBreak -> "\n"
         NonBreakingSpace -> "\160"
