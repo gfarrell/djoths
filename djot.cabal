@@ -27,6 +27,7 @@ Library
     import:           deps
     build-depends:    mtl,
                       containers >= 0.6.6,
+                      network-uri,
                       text,
                       template-haskell
     hs-source-dirs:   src

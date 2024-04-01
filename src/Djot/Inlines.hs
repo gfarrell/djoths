@@ -348,6 +348,7 @@ pCitation = do
   asciiChar '['
   citeMode <- (asciiChar '+' $> Integral) <|> pure NonIntegral
   sources <- sepBy1 pCiteSource (asciiChar ';' *> optional_ ws)
+  asciiChar ']'
   pure $ citation citeMode sources
   where
     pCiteSource :: P CiteSource

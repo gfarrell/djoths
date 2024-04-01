@@ -23,6 +23,10 @@ module Djot.AST
   insertNote,
   lookupNote,
   ReferenceMap(..),
+  CitationMap (..),
+  CitationRecord (..),
+  Author (..),
+  Year,
   insertReference,
   lookupReference,
   normalizeLabel,
@@ -94,6 +98,8 @@ import Data.Data (Data, Typeable)
 import qualified Data.ByteString.Char8 as B8
 import GHC.Generics (Generic)
 import Language.Haskell.TH.Syntax (Lift (..))
+import Data.List.NonEmpty (NonEmpty)
+import Network.URI (URI)
 
 -- import Debug.Trace
 
@@ -159,10 +165,10 @@ data QuoteType = SingleQuotes | DoubleQuotes
 data CiteMode = Integral | NonIntegral
   deriving (Show, Ord, Eq, Typeable, Data, Generic, Lift)
 
-newtype CiteSourceLabel = CiteSourceLabel ByteString
+newtype CiteSourceLabel = CiteSourceLabel { unCiteSourceLabel :: ByteString }
   deriving (Show, Ord, Eq, Typeable, Data, Generic, Lift)
 
-newtype CiteSourcePosition = CiteSourcePosition ByteString
+newtype CiteSourcePosition = CiteSourcePosition { unCiteSourcePosition :: ByteString }
   deriving (Show, Ord, Eq, Typeable, Data, Generic, Lift)
 
 data CiteSource = CiteSource CiteSourceLabel (Maybe CiteSourcePosition)
@@ -299,15 +305,16 @@ data Doc =
      , docReferences :: ReferenceMap
      , docAutoReferences :: ReferenceMap
      , docAutoIdentifiers :: Set ByteString
+     , docCitations :: CitationMap
      } deriving (Show, Ord, Eq, Typeable, Data, Generic, Lift)
 
 instance Semigroup Doc where
-  Doc bs ns rs ar ai <> Doc bs' ns' rs' ar' ai' =
-    Doc (bs <> bs') (ns <> ns') (rs <> rs') (ar <> ar') (ai <> ai')
+  Doc bs ns rs ar ai cs <> Doc bs' ns' rs' ar' ai' cs' =
+    Doc (bs <> bs') (ns <> ns') (rs <> rs') (ar <> ar') (ai <> ai') (cs <> cs')
 
 instance Monoid Doc where
   mappend = (<>)
-  mempty = Doc mempty mempty mempty mempty mempty
+  mempty = Doc mempty mempty mempty mempty mempty mempty
 
 -- | A map from labels to contents.
 newtype NoteMap = NoteMap { unNoteMap :: M.Map ByteString Blocks }
@@ -324,6 +331,22 @@ lookupNote label (NoteMap m) =
 newtype ReferenceMap =
   ReferenceMap { unReferenceMap :: M.Map ByteString (ByteString, Attr) }
   deriving (Show, Ord, Eq, Semigroup, Monoid, Typeable, Data, Generic, Lift)
+
+newtype CitationMap =
+  CitationMap { unCitationMap :: M.Map ByteString CitationRecord }
+  deriving (Show, Ord, Eq, Semigroup, Monoid, Typeable, Data, Generic, Lift)
+
+newtype Author = Author { unAuthor :: ByteString }
+  deriving (Show, Ord, Eq, Typeable, Data, Generic, Lift)
+
+type Year = Int
+
+data CitationRecord = CitationRecord {
+    citAuthor :: NonEmpty Author,
+    citYear :: Year,
+    citUri :: Maybe URI
+  }
+  deriving (Show, Ord, Eq, Typeable, Data, Generic, Lift)
 
 normalizeLabel :: ByteString -> ByteString
 normalizeLabel = B8.unwords . B8.splitWith isWs

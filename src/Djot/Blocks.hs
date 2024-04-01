@@ -32,6 +32,7 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Control.Applicative
 import Data.Typeable (Typeable)
+import GHC.RTS.Flags (DebugFlags(stm))
 -- import Debug.Trace
 
 parseDoc :: ParseOptions -> ByteString -> Either String Doc
@@ -931,7 +932,9 @@ pDoc = do
             , docFootnotes = psNoteMap st
             , docReferences = psReferenceMap st
             , docAutoReferences = psAutoReferenceMap st
-            , docAutoIdentifiers = psAutoIds st }
+            , docAutoIdentifiers = psAutoIds st
+            , docCitations = mempty
+            }
 
 pBlocks :: P Blocks
 pBlocks = processLines >> finalizeDocument

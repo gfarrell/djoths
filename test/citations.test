@@ -5,7 +5,7 @@
 ````
 Hello [+@foo] and [+@bar]
 .
-<p>Hello <a class="citation" href="#cite1" role="doc-citation">Foo (1943)</a> and <a class="citation" href="#cite2" role="doc-citation">Bar (1989)</a>
+<p>Hello <a class="citation" href="#cite_foo" role="doc-citation">Foo (1943)</a> and <a class="citation" href="#cite_bar" role="doc-citation">Bar (1989)</a>
 ````
 
 ### With positions
@@ -13,7 +13,7 @@ Hello [+@foo] and [+@bar]
 ````
 Hello [+@foo, p. 42]
 .
-<p>Hello <a class="citation" href="#cite1" role="doc-citation">Foo (1943, p. 42)</a>
+<p>Hello <a class="citation" href="#cite_foo" role="doc-citation">Foo (1943, p. 42)</a>
 ````
 
 ### With multiple references
@@ -21,7 +21,7 @@ Hello [+@foo, p. 42]
 ````
 Hello [+@foo, p. 42; @bar; @baz, fig. 5]
 .
-<p>Hello <a class="citation" href="#cite1" role="doc-citation">Foo (1943, p. 42), Bar (1989), Baz (2123, fig. 5)</a>
+<p>Hello <a class="citation" href="#cite_foo" role="doc-citation">Foo (1943, p. 42)</a>, <a class="citation" href="#cite_bar" role="doc-citation">Bar (1989), <a class="citation" href="#cite_baz" role="doc-citation">Baz (2123, fig. 5)</a>
 ````
 
 ## Non-integral citations
@@ -31,7 +31,7 @@ Hello [+@foo, p. 42; @bar; @baz, fig. 5]
 ````
 Hello [@foo] and [@bar]
 .
-<p>Hello <a class="citation" href="#cite1" role="doc-citation">(Foo 1943)</a> and <a class="citation" href="#cite2" role="doc-citation">(Bar 1989)</a>
+<p>Hello <a class="citation" href="#cite_foo" role="doc-citation">(Foo 1943)</a> and <a class="citation" href="#cite_bar" role="doc-citation">(Bar 1989)</a>
 ````
 
 ### With positions
@@ -39,7 +39,7 @@ Hello [@foo] and [@bar]
 ````
 Hello [@foo, p. 42]
 .
-<p>Hello <a class="citation" href="#cite1" role="doc-citation">(Foo 1943, p. 42)</a>
+<p>Hello <a class="citation" href="#cite_foo" role="doc-citation">(Foo 1943, p. 42)</a>
 ````
 
 ### With multiple references
@@ -47,6 +47,6 @@ Hello [@foo, p. 42]
 ````
 Hello [+@foo, p. 42; @bar; @baz, fig. 5]
 .
-<p>Hello <a class="citation" href="#cite1" role="doc-citation">(Foo 1943, p. 42), (Bar 1989), (Baz 2123, fig. 5)</a>
+<p>Hello <a class="citation" href="#cite_foo" role="doc-citation">(Foo 1943, p. 42)</a>, <a class="citation" href="#cite_bar" role="doc-citation">(Bar 1989)</a>, <a class="citation" href="#cite_baz" role="doc-citation">(Baz 2123, fig. 5)</a>
 ````
 

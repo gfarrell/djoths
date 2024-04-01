@@ -20,9 +20,10 @@ import Data.ByteString.Builder (Builder, byteString, word8, intDec)
 import qualified Data.Sequence as Seq
 import qualified Data.Map.Strict as M
 import Data.Maybe (fromMaybe)
-import Data.List (sort)
+import Data.List (sort, intersperse)
 import Control.Monad.State
 import qualified Data.Foldable as F
+import qualified Data.List.NonEmpty as NE
 
 renderHtml :: RenderOptions -> Doc -> Builder
 renderHtml opts doc = evalState
@@ -33,6 +34,7 @@ renderHtml opts doc = evalState
                                , renderedNotes = mempty
                                , referenceMap = docReferences doc
                                              <> docAutoReferences doc
+                               , citationMap = docCitations doc
                                , options = opts
                                }
 
@@ -100,6 +102,7 @@ data BState =
          , noteRefs :: M.Map ByteString Int
          , renderedNotes :: M.Map ByteString Builder
          , referenceMap :: ReferenceMap
+         , citationMap :: CitationMap
          , options :: RenderOptions
          }
 
@@ -314,6 +317,24 @@ instance ToBuilder (Node Inline) where
                                      ("href", "#fn" <> num'),
                                      ("role", "doc-noteref")] <> attr) $
                  inTags "sup" pos mempty (escapeHtml num')
+      Citation citeMode sources -> do
+        citerefs <- gets citationMap
+        pure 
+          $ mconcat . intersperse (inTags "span" pos mempty ", ")
+          $ flip map sources 
+          $ \(CiteSource (CiteSourceLabel label) mCitePos) ->
+            let maybeRef = M.lookup label (unCitationMap citerefs)
+                authors r = 
+                  let xs = citAuthor r
+                   in byteString . (<> if NE.length xs > 1 then " et al." else "") . unAuthor . NE.head $ xs
+                year = byteString . B8.pack . show . citYear
+                posn = byteString . maybe "" ((", " <>) . unCiteSourcePosition)
+             in case maybeRef of
+                  Just ref -> inTags "cite" pos (Attr [("role", "doc-citation")]) $ case citeMode of
+                        Integral -> authors ref <> " (" <> year ref <> posn mCitePos <> ")"
+                        NonIntegral -> "(" <> authors ref <> " " <> year ref <> posn mCitePos <> ")"
+                  Nothing -> inTags "i" pos mempty $ "unknown ref " <> byteString label <> "!"
+
 
 {-# INLINE inTags #-}
 inTags :: ByteString -> Pos -> Attr -> Builder -> Builder
